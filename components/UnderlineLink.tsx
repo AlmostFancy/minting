@@ -12,7 +12,7 @@ function UnderlineLink({
     return (
         <Link href={url}>
             <a
-                className="font-bold underline decoration-dotted underline-offset-2"
+                className="font-bold underline decoration-dotted underline-offset-2 hover:opacity-60"
                 target={'_blank'}
                 rel="noreferrer"
             >

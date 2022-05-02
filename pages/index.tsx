@@ -1,13 +1,22 @@
 /* eslint-disable @next/next/no-img-element */
 import { NextPage } from 'next';
 import PageContainer from '../components/PageContainer';
-import { Transition } from '@headlessui/react';
+import { Dialog, Transition } from '@headlessui/react';
 import Head from 'next/head';
 import FoundersTicket from '../components/FoundersTicket';
 import UnderlineLink from '../components/UnderlineLink';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { shortenAddress, useEthers, useLookupAddress } from '@usedapp/core';
+import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
+import {
+    Rinkeby,
+    shortenAddress,
+    useEthers,
+    useLookupAddress,
+} from '@usedapp/core';
 import PrinterTop from '../components/Printer/PrinterTop';
+import { WalletConnectConnector } from '@web3-react/walletconnect-connector';
+import useHasMetaMask from '../hooks/useHasMetaMask';
+import Link from 'next/link';
+import Image from 'next/image';
 
 type SplitLineProps = {
     main: string;
@@ -22,10 +31,33 @@ const SplitLines = ({ main, last }: SplitLineProps) => (
     </div>
 );
 
+const walletConnect = new WalletConnectConnector({
+    rpc: {
+        [Rinkeby.chainId]:
+            'https://eth-rinkeby.alchemyapi.io/v2/9R_yWpWjLB7vKcGfCR_I2HU-X5Fuahol',
+    },
+    qrcode: true,
+});
+
 const MainPage: NextPage = () => {
-    const { activateBrowserWallet, account, deactivate, error } = useEthers();
+    const { activate, activateBrowserWallet, account, deactivate, error } =
+        useEthers();
+    const [connectWallet, setConnectWallet] = useState(false);
+    const [err, setErr] = useState('');
+    const hasMetaMask = useHasMetaMask();
     const ens = useLookupAddress();
     const [idx, setIdx] = useState(0);
+    const [ticketStatus, setTicketStatus] = useState(0);
+
+    useEffect(() => {
+        if (error) {
+            if (typeof error === 'string') {
+                setErr(error);
+            } else {
+                setErr(error.message);
+            }
+        }
+    }, [error]);
 
     const incrementIdx = useCallback(() => {
         setIdx(idx + 1);
@@ -38,18 +70,59 @@ const MainPage: NextPage = () => {
         return () => clearInterval(interval);
     }, [incrementIdx]);
 
+    const disconnect = () => {
+        setTicketStatus(0);
+        deactivate();
+    };
+
+    const activateMM = () => {
+        try {
+            setErr('');
+            setConnectWallet(false);
+            if (!hasMetaMask) {
+                setErr('MetaMask is not installed!');
+                return;
+            }
+
+            activateBrowserWallet();
+            setTicketStatus(1);
+        } catch (err) {
+            if (typeof err === 'string') {
+                setErr(err);
+            } else if (err instanceof Error) {
+                setErr(err.message);
+            }
+        }
+    };
+
+    const activateWC = () => {
+        setConnectWallet(false);
+        setErr('');
+        activate(walletConnect)
+            .then(() => {
+                setTicketStatus(1);
+            })
+            .catch((err) => {
+                if (typeof err === 'string') {
+                    setErr(err);
+                } else if (err instanceof Error) {
+                    setErr(err.message);
+                }
+            });
+    };
+
     const printerStatus = useMemo(() => {
         let status = 'waiting';
         if (account) {
             status = 'connected';
         }
 
-        if (error) {
+        if (err) {
             status = 'failed';
         }
 
         return status.concat(Array((idx % 4) + 1).join('.'));
-    }, [idx, account, error]);
+    }, [idx, account, err]);
 
     const overrideFooter = useMemo(() => {
         if (!account) return null;
@@ -57,7 +130,7 @@ const MainPage: NextPage = () => {
             <Transition
                 show={true}
                 appear={true}
-                enter="duration-75 ease-in"
+                enter="duration-75 ease-out"
                 enterFrom="opacity-0"
                 enterTo="opacity-100"
                 className={'sticky bottom-0'}
@@ -65,11 +138,15 @@ const MainPage: NextPage = () => {
                 <div
                     className={`flex h-auto w-full flex-col items-center space-y-5 border-t border-black bg-black py-[20px] px-[20px] font-mono text-white md:h-[70px] md:flex-row md:justify-between md:space-y-0 md:px-[40px]`}
                 >
-                    <div className={`flex w-full justify-between xl:w-[40%]`}>
-                        <p className="block font-light md:hidden xl:block">
+                    <div
+                        className={`flex w-full justify-between xl:w-[30%] xl:justify-around`}
+                    >
+                        <p className="block pr-5 font-light md:hidden md:pr-0 xl:block">
                             connected to
                         </p>
-                        <p className="block font-light md:hidden xl:block">/</p>
+                        <p className="block pr-5 font-light md:hidden md:pr-0 xl:block">
+                            /
+                        </p>
                         <p className="hidden font-light xl:block">
                             {ens ? ens : shortenAddress(account)}
                         </p>
@@ -98,8 +175,8 @@ const MainPage: NextPage = () => {
                         <SplitLines main="supply" last="1,111" />
                         <SplitLines main="per wallet" last="01" />
                         <SplitLines main="price" last="0.033Ξ" />
-                        <SplitLines main="mintlist date" last="May 10" />
-                        <SplitLines main="public mint" last="May 11" />
+                        <SplitLines main="mintlist date" last="May 10th" />
+                        <SplitLines main="public mint" last="May 11th" />
 
                         <p className="pt-5">
                             Founders pass offers early access and special perks
@@ -133,15 +210,19 @@ const MainPage: NextPage = () => {
                                 Mint your Founders Pass
                             </p>
                         </div>
-                        <div className="relative flex min-w-[90%] flex-col overflow-hidden md:min-w-[50%]">
+                        <div className="relative flex min-w-[90%] flex-col md:min-w-[50%]">
                             <PrinterTop
                                 status={printerStatus}
                                 className="z-10"
                             />
-                            <FoundersTicket className="absolute left-1/2 ml-[-45px] w-[100px] text-center" />
+                            <FoundersTicket
+                                className={`absolute left-1/2 ml-[-45px] w-[100px] text-center transition-all duration-700 ${
+                                    ticketStatus == 0 ? 'pt-0' : 'pt-20'
+                                }`}
+                            />
                             <img
                                 src="/images/printer-bottom.svg"
-                                className="aspect-auto"
+                                className="aspect-auto select-none"
                                 width="100%"
                                 alt="Printer Bottom"
                             />
@@ -154,17 +235,17 @@ const MainPage: NextPage = () => {
                             <FoundersTicket />
                         </div> */}
                         <div className="items-center pt-5 text-center">
-                            {error && (
+                            {err && (
                                 <p className="pb-5 font-mono text-red-500">
-                                    {error.message}
+                                    {err}
                                 </p>
                             )}
                             <button
-                                className="bg-black px-10 py-2 font-semibold uppercase text-white"
+                                className="bg-black px-10 py-2 font-semibold uppercase text-white hover:text-brand-red"
                                 onClick={() =>
                                     account
-                                        ? deactivate()
-                                        : activateBrowserWallet()
+                                        ? disconnect()
+                                        : setConnectWallet(true)
                                 }
                             >
                                 {account ? 'disconnect' : 'minting may 10'}
@@ -179,6 +260,78 @@ const MainPage: NextPage = () => {
                     </div>
                 </div>
             </PageContainer>
+            <Transition.Root show={connectWallet} as={Fragment}>
+                <Dialog
+                    onClose={setConnectWallet}
+                    className="fixed inset-0 z-50 overflow-y-auto p-4 pt-[25vh]"
+                >
+                    <Transition.Child
+                        enter="duration-300 ease-out"
+                        enterFrom="opacity-0"
+                        enterTo="opacity-100"
+                        leave="duration-200 ease-in"
+                        leaveFrom="opacity-100"
+                        leaveTo="opacity-0"
+                    >
+                        <Dialog.Overlay className="fixed inset-0 bg-gray-500/75"></Dialog.Overlay>
+                    </Transition.Child>
+                    <Transition.Child
+                        enter="duration-300 ease-out"
+                        enterFrom="opacity-0 scale-95"
+                        enterTo="opacity-100 scale-100"
+                        leave="duration-200 ease-in"
+                        leaveFrom="opacity-100 scale-100"
+                        leaveTo="opacity-0 scale-95"
+                    >
+                        <div className="relative mx-auto flex max-w-xl flex-col items-center border border-black bg-white py-4 text-center">
+                            <p
+                                className="absolute right-2 top-0 cursor-pointer font-mono text-2xl hover:scale-95"
+                                onClick={() => setConnectWallet(false)}
+                            >
+                                x
+                            </p>
+                            <p className="pb-5 text-center text-lg font-semibold underline underline-offset-2">
+                                Connect your wallet
+                            </p>
+                            {hasMetaMask && (
+                                <button
+                                    className="mb-5 flex w-[90%] flex-row items-center justify-between border border-black px-4 py-2 text-center hover:bg-black hover:text-white"
+                                    onClick={activateMM}
+                                >
+                                    <p>Connect via MetaMask</p>
+                                    <Image
+                                        src={'/images/metamask-fox.svg'}
+                                        width={40}
+                                        height={40}
+                                        alt="MetaMask"
+                                    />
+                                </button>
+                            )}
+                            <button
+                                className="mb-5 flex w-[90%] flex-row items-center justify-between border border-black px-4 py-2 text-center hover:bg-black hover:text-white"
+                                onClick={activateWC}
+                            >
+                                <p>Connect via WalletConnect</p>
+                                <Image
+                                    src={'/images/walletconnect-logo.svg'}
+                                    width={40}
+                                    height={40}
+                                    alt="WalletConnect"
+                                />
+                            </button>
+                            <Link href={'#'}>
+                                <a
+                                    className="text-sm font-bold underline decoration-dotted underline-offset-2 hover:opacity-60"
+                                    target={'_blank'}
+                                    rel="noreferrer"
+                                >
+                                    New to Ethereum?
+                                </a>
+                            </Link>
+                        </div>
+                    </Transition.Child>
+                </Dialog>
+            </Transition.Root>
         </>
     );
 };
