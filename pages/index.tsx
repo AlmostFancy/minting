@@ -24,9 +24,9 @@ type SplitLineProps = {
 };
 
 const SplitLines = ({ main, last }: SplitLineProps) => (
-    <div className="flex w-full justify-between pb-5">
+    <div className="relative flex w-full justify-between pb-5">
         <p>{main}</p>
-        <p>/</p>
+        <p className="absolute left-1/2">/</p>
         <p>{last}</p>
     </div>
 );
@@ -70,6 +70,14 @@ const MainPage: NextPage = () => {
         return () => clearInterval(interval);
     }, [incrementIdx]);
 
+    useEffect(() => {
+        if (!account) {
+            setTicketStatus(0);
+        } else {
+            setTicketStatus(1);
+        }
+    }, [account]);
+
     const disconnect = () => {
         setTicketStatus(0);
         deactivate();
@@ -85,7 +93,6 @@ const MainPage: NextPage = () => {
             }
 
             activateBrowserWallet();
-            setTicketStatus(1);
         } catch (err) {
             if (typeof err === 'string') {
                 setErr(err);
@@ -98,17 +105,13 @@ const MainPage: NextPage = () => {
     const activateWC = () => {
         setConnectWallet(false);
         setErr('');
-        activate(walletConnect)
-            .then(() => {
-                setTicketStatus(1);
-            })
-            .catch((err) => {
-                if (typeof err === 'string') {
-                    setErr(err);
-                } else if (err instanceof Error) {
-                    setErr(err.message);
-                }
-            });
+        activate(walletConnect).catch((err) => {
+            if (typeof err === 'string') {
+                setErr(err);
+            } else if (err instanceof Error) {
+                setErr(err.message);
+            }
+        });
     };
 
     const printerStatus = useMemo(() => {
@@ -139,12 +142,12 @@ const MainPage: NextPage = () => {
                     className={`flex h-auto w-full flex-col items-center space-y-5 border-t border-black bg-black py-[20px] px-[20px] font-mono text-white md:h-[70px] md:flex-row md:justify-between md:space-y-0 md:px-[40px]`}
                 >
                     <div
-                        className={`flex w-full justify-between xl:w-[30%] xl:justify-around`}
+                        className={`relative flex w-full justify-between xl:w-[30%] `}
                     >
-                        <p className="block pr-5 font-light md:hidden md:pr-0 xl:block">
+                        <p className="block font-light md:hidden md:pr-0 xl:block">
                             connected to
                         </p>
-                        <p className="block pr-5 font-light md:hidden md:pr-0 xl:block">
+                        <p className="block font-light md:hidden md:pr-0 xl:block">
                             /
                         </p>
                         <p className="hidden font-light xl:block">
@@ -155,7 +158,10 @@ const MainPage: NextPage = () => {
                         </p>
                     </div>
                     <div>
-                        <button className="bg-white px-10 py-3 font-sans font-semibold uppercase text-black">
+                        <button
+                            className="bg-white px-10 py-3 font-sans font-semibold uppercase text-black"
+                            onClick={() => setTicketStatus(2)}
+                        >
                             mint
                         </button>
                     </div>
@@ -217,7 +223,11 @@ const MainPage: NextPage = () => {
                             />
                             <FoundersTicket
                                 className={`absolute left-1/2 ml-[-45px] w-[100px] text-center transition-all duration-700 ${
-                                    ticketStatus == 0 ? 'pt-0' : 'pt-20'
+                                    ticketStatus == 0
+                                        ? 'pt-5'
+                                        : ticketStatus == 1
+                                        ? 'mt-20'
+                                        : 'mt-28 xl:mt-36'
                                 }`}
                             />
                             <img
@@ -241,7 +251,7 @@ const MainPage: NextPage = () => {
                                 </p>
                             )}
                             <button
-                                className="bg-black px-10 py-2 font-semibold uppercase text-white hover:text-brand-red"
+                                className="bg-black px-10 py-2 font-semibold uppercase text-white hover:text-gray-300"
                                 onClick={() =>
                                     account
                                         ? disconnect()
@@ -285,7 +295,7 @@ const MainPage: NextPage = () => {
                     >
                         <div className="relative mx-auto flex max-w-xl flex-col items-center border border-black bg-white py-4 text-center">
                             <p
-                                className="absolute right-2 top-0 cursor-pointer font-mono text-2xl hover:scale-95"
+                                className="absolute right-2 top-0 cursor-pointer font-mono text-2xl hover:scale-95 hover:text-brand-red"
                                 onClick={() => setConnectWallet(false)}
                             >
                                 x
