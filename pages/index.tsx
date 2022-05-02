@@ -298,7 +298,7 @@ const MainPage: NextPage = () => {
                             </p>
                             {hasMetaMask && (
                                 <button
-                                    className="mb-5 flex w-[90%] flex-row items-center justify-between border border-black px-4 py-2 text-center hover:bg-black hover:text-white"
+                                    className="mb-5 flex w-[90%] flex-row items-center justify-between border border-black px-4 py-2 text-center hover:bg-black hover:text-white focus:outline-none"
                                     onClick={activateMM}
                                 >
                                     <p>Connect via MetaMask</p>
@@ -311,7 +311,7 @@ const MainPage: NextPage = () => {
                                 </button>
                             )}
                             <button
-                                className="mb-5 flex w-[90%] flex-row items-center justify-between border border-black px-4 py-2 text-center hover:bg-black hover:text-white"
+                                className="mb-5 flex w-[90%] flex-row items-center justify-between border border-black px-4 py-2 text-center hover:bg-black hover:text-white focus:outline-none"
                                 onClick={activateWC}
                             >
                                 <p>Connect via WalletConnect</p>
