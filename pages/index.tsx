@@ -205,13 +205,6 @@ const MainPage: NextPage = () => {
                     </div>
                     <div className="flex min-w-full flex-1 flex-col items-center py-10 xl:min-w-[65%] xl:py-10">
                         <div className="text-center">
-                            {/* <Image
-                                src={'/images/red_x.svg'}
-                                height={100}
-                                width={100}
-                                alt="x"
-                                className="absolute top-0 left-0"
-                            /> */}
                             <p className="pb-10 text-4xl font-semibold md:text-5xl">
                                 Mint your Founders Pass
                             </p>
@@ -227,7 +220,7 @@ const MainPage: NextPage = () => {
                                         ? 'pt-5'
                                         : ticketStatus == 1
                                         ? 'mt-20'
-                                        : 'mt-28 xl:mt-36'
+                                        : 'mt-24 xl:mt-36'
                                 }`}
                             />
                             <img
