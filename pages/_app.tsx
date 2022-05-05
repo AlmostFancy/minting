@@ -5,8 +5,7 @@ import { Config, DAppProvider, Rinkeby } from '@usedapp/core';
 const dappConfig: Config = {
     readOnlyChainId: Rinkeby.chainId,
     readOnlyUrls: {
-        [Rinkeby.chainId]:
-            'https://eth-rinkeby.alchemyapi.io/v2/9R_yWpWjLB7vKcGfCR_I2HU-X5Fuahol',
+        [Rinkeby.chainId]: process.env.ALCHEMY_URL || '',
     },
     autoConnect: true,
 };

@@ -36,8 +36,7 @@ const MintingContext = React.createContext<MintingCtx | null>(null);
 
 const walletConnect = new WalletConnectConnector({
     rpc: {
-        [Rinkeby.chainId]:
-            'https://eth-rinkeby.alchemyapi.io/v2/9R_yWpWjLB7vKcGfCR_I2HU-X5Fuahol',
+        [Rinkeby.chainId]: process.env.ALCHEMY_URL || '',
     },
     qrcode: true,
 });
