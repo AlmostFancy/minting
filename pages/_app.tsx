@@ -1,20 +1,56 @@
 import '../styles/globals.css';
 import type { AppProps } from 'next/app';
-import { Config, DAppProvider, Rinkeby } from '@usedapp/core';
+import '@rainbow-me/rainbowkit/styles.css';
+import {
+    apiProvider,
+    configureChains,
+    getDefaultWallets,
+    lightTheme,
+    RainbowKitProvider,
+    Theme,
+} from '@rainbow-me/rainbowkit';
+import merge from 'lodash.merge';
+import { chain, createClient, WagmiProvider } from 'wagmi';
 
-const dappConfig: Config = {
-    readOnlyChainId: Rinkeby.chainId,
-    readOnlyUrls: {
-        [Rinkeby.chainId]: process.env.ALCHEMY_URL || '',
-    },
+const { chains, provider } = configureChains(
+    [process.env.NODE_ENV === 'production' ? chain.mainnet : chain.rinkeby],
+    [apiProvider.alchemy(process.env.ALCHEMY_ID), apiProvider.fallback()],
+);
+
+const { connectors } = getDefaultWallets({
+    appName: 'Almost Fancy',
+    chains,
+});
+
+const wagmiClient = createClient({
     autoConnect: true,
-};
+    connectors,
+    provider,
+});
+
+const rainbowTheme = merge(
+    lightTheme({
+        borderRadius: 'none',
+        accentColor: 'black',
+    }),
+    {
+        colors: {
+            modalBorder: 'black',
+        },
+    } as Theme,
+);
 
 function MyApp({ Component, pageProps }: AppProps) {
     return (
-        <DAppProvider config={dappConfig}>
-            <Component {...pageProps} />
-        </DAppProvider>
+        <WagmiProvider client={wagmiClient}>
+            <RainbowKitProvider
+                chains={chains}
+                showRecentTransactions
+                theme={rainbowTheme}
+            >
+                <Component {...pageProps} />
+            </RainbowKitProvider>
+        </WagmiProvider>
     );
 }
 

@@ -1,21 +1,14 @@
-import { Dialog, Transition } from '@headlessui/react';
-import { shortenAddress, useEthers, useLookupAddress } from '@usedapp/core';
+import { Transition } from '@headlessui/react';
 import Head from 'next/head';
-import Image from 'next/image';
-import Link from 'next/link';
-import React, { useMemo, useState } from 'react';
-import useHasMetaMask from '../hooks/useHasMetaMask';
-import ConnectWalletDialog from './ConnectWalletDialog';
-import { TicketStatus, useMintingContext } from './MintingProvider';
+import { useMemo } from 'react';
+import { shortenAddress } from '../hooks/useShortAddress';
+import { useMintingContext } from './MintingProvider';
 import PageContainer from './PageContainer';
 import PrinterMintContainer from './PrinterMintContainer';
 import SideNavigation from './SideNavigation';
 
 function MintPageContainer() {
-    const { account, setTicketStatus } = useMintingContext();
-    const ens = useLookupAddress();
-    const hasMetaMask = useHasMetaMask();
-    const [connectWallet, setConnectWallet] = useState(false);
+    const { account, ens } = useMintingContext();
 
     const overrideFooter = useMemo(() => {
         if (!account) return null;
@@ -68,13 +61,9 @@ function MintPageContainer() {
             <PageContainer overrideFooter={overrideFooter}>
                 <div className="pg-10 flex flex-1 flex-col-reverse xl:flex-row">
                     <SideNavigation />
-                    <PrinterMintContainer setConnectWallet={setConnectWallet} />
+                    <PrinterMintContainer />
                 </div>
             </PageContainer>
-            <ConnectWalletDialog
-                setConnectWallet={setConnectWallet}
-                connectWallet={connectWallet}
-            />
         </>
     );
 }

@@ -1,16 +1,13 @@
 /* eslint-disable @next/next/no-img-element */
+import { ConnectButton } from '@rainbow-me/rainbowkit';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import FoundersTicket from './FoundersTicket';
 import { useMintingContext } from './MintingProvider';
 import PrinterTop from './Printer/PrinterTop';
 import UnderlineLink from './UnderlineLink';
 
-type PrinterMintContainerProps = {
-    setConnectWallet: (open: boolean) => void;
-};
-
-function PrinterMintContainer({ setConnectWallet }: PrinterMintContainerProps) {
-    const { ticketStatus, error, account, disconnect } = useMintingContext();
+function PrinterMintContainer() {
+    const { ticketStatus, error, account } = useMintingContext();
     const [idx, setIdx] = useState(0);
 
     const incrementIdx = useCallback(() => {
@@ -66,14 +63,46 @@ function PrinterMintContainer({ setConnectWallet }: PrinterMintContainerProps) {
                 {error && (
                     <p className="pb-5 font-mono text-red-500">{error}</p>
                 )}
-                <button
-                    className="bg-black px-10 py-2 font-semibold uppercase text-white hover:text-gray-300"
-                    onClick={() =>
-                        account ? disconnect() : setConnectWallet(true)
-                    }
-                >
-                    {account ? 'disconnect' : 'minting may 18'}
-                </button>
+                <ConnectButton.Custom>
+                    {({
+                        openAccountModal,
+                        openConnectModal,
+                        openChainModal,
+                        account,
+                        chain,
+                        mounted,
+                    }) => {
+                        if (!mounted || !account || !chain) {
+                            return (
+                                <button
+                                    className="bg-black px-10 py-2 font-semibold uppercase text-white hover:text-gray-300"
+                                    onClick={openConnectModal}
+                                >
+                                    minting may 18
+                                </button>
+                            );
+                        }
+
+                        if (chain?.unsupported) {
+                            return (
+                                <button
+                                    className="bg-black px-10 py-2 font-semibold uppercase text-white hover:text-gray-300"
+                                    onClick={openChainModal}
+                                >
+                                    wrong network
+                                </button>
+                            );
+                        }
+                        return (
+                            <button
+                                className="bg-black px-10 py-2 font-semibold uppercase text-white hover:text-gray-300"
+                                onClick={openAccountModal}
+                            >
+                                manage account
+                            </button>
+                        );
+                    }}
+                </ConnectButton.Custom>
                 <p className="pt-5">
                     Enter the almost list raffle{' '}
                     <UnderlineLink url="https://www.premint.xyz/almostfancy/">

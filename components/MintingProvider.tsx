@@ -1,14 +1,11 @@
-import { Rinkeby, useEthers } from '@usedapp/core';
-import { WalletConnectConnector } from '@web3-react/walletconnect-connector';
 import React, {
     ReactNode,
-    useCallback,
     useContext,
     useEffect,
     useMemo,
     useState,
 } from 'react';
-import useHasMetaMask from '../hooks/useHasMetaMask';
+import { useAccount, useDisconnect, useEnsName } from 'wagmi';
 
 enum ConnectType {
     META_MASK,
@@ -22,9 +19,9 @@ enum TicketStatus {
 }
 
 type MintingCtx = {
-    connect: (type: ConnectType) => void;
     disconnect: () => void;
     account: string | null | undefined;
+    ens: string | null | undefined;
     ticketStatus: TicketStatus;
     setTicketStatus: (status: TicketStatus) => void;
 
@@ -34,27 +31,15 @@ type MintingCtx = {
 
 const MintingContext = React.createContext<MintingCtx | null>(null);
 
-const walletConnect = new WalletConnectConnector({
-    rpc: {
-        [Rinkeby.chainId]: process.env.ALCHEMY_URL || '',
-    },
-    qrcode: true,
-});
-
 type MintingProviderProps = {
     children: ReactNode;
 };
 
 function MintingProvider({ children }: MintingProviderProps) {
-    const {
-        activate,
-        activateBrowserWallet,
-        deactivate,
-        error: ethersErr,
-        account,
-    } = useEthers();
+    const { data: account } = useAccount();
+    const { data: ensName } = useEnsName({ address: account?.address });
+    const { disconnect } = useDisconnect();
     const [error, setError] = useState('');
-    const hasMetaMask = useHasMetaMask();
     const [ticketStatus, setTicketStatus] = useState<TicketStatus>(
         TicketStatus.DISCONNECTED,
     );
@@ -65,69 +50,24 @@ function MintingProvider({ children }: MintingProviderProps) {
         }
     }, [account]);
 
-    useEffect(() => {
-        if (ethersErr) {
-            if (typeof ethersErr === 'string') {
-                setError(ethersErr);
-            } else {
-                setError(ethersErr.message);
-            }
-        }
-    }, [ethersErr]);
-
-    const connect = useCallback(
-        (type: ConnectType) => {
-            setError('');
-            if (type === ConnectType.META_MASK) {
-                try {
-                    if (!hasMetaMask) {
-                        setError('MetaMask is not installed!');
-                        return;
-                    }
-                    activateBrowserWallet();
-                    setTicketStatus(TicketStatus.CONNECTED);
-                } catch (err) {
-                    if (typeof err === 'string') {
-                        setError(err);
-                    } else if (err instanceof Error) {
-                        setError(err.message);
-                    }
-                }
-            } else if (type === ConnectType.WALLET_CONNECT) {
-                activate(walletConnect)
-                    .then(() => {
-                        setTicketStatus(TicketStatus.CONNECTED);
-                    })
-                    .catch((err) => {
-                        if (typeof err === 'string') {
-                            setError(err);
-                        } else if (err instanceof Error) {
-                            setError(err.message);
-                        }
-                    });
-            }
-        },
-        [activate, activateBrowserWallet, hasMetaMask],
-    );
-
     const ctx: MintingCtx = useMemo(
         () => ({
-            connect,
-            disconnect: deactivate,
+            disconnect,
             ticketStatus,
             setTicketStatus,
             error,
             setError,
-            account,
+            account: account?.address,
+            ens: ensName,
         }),
         [
-            connect,
-            deactivate,
+            disconnect,
             ticketStatus,
             setTicketStatus,
             error,
             setError,
             account,
+            ensName,
         ],
     );
 
