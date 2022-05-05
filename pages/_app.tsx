@@ -4,10 +4,11 @@ import '@rainbow-me/rainbowkit/styles.css';
 import {
     apiProvider,
     configureChains,
-    getDefaultWallets,
+    connectorsForWallets,
     lightTheme,
     RainbowKitProvider,
     Theme,
+    wallet,
 } from '@rainbow-me/rainbowkit';
 import merge from 'lodash.merge';
 import { chain, createClient, WagmiProvider } from 'wagmi';
@@ -17,10 +18,24 @@ const { chains, provider } = configureChains(
     [apiProvider.alchemy(process.env.ALCHEMY_ID), apiProvider.fallback()],
 );
 
-const { connectors } = getDefaultWallets({
-    appName: 'Almost Fancy',
-    chains,
-});
+const connectors = connectorsForWallets([
+    {
+        groupName: 'Fancy Ones',
+        wallets: [
+            wallet.metaMask({ chains }),
+            wallet.walletConnect({ chains }),
+            wallet.rainbow({ chains }),
+        ],
+    },
+    {
+        groupName: 'Almost Fancy Ones',
+        wallets: [
+            wallet.ledger({ chains }),
+            wallet.coinbase({ appName: 'Almost Fancy', chains }),
+            wallet.argent({ chains }),
+        ],
+    },
+]);
 
 const wagmiClient = createClient({
     autoConnect: true,
