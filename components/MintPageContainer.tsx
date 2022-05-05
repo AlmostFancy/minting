@@ -11,7 +11,7 @@ function MintPageContainer() {
     const { account, ens } = useMintingContext();
 
     const overrideFooter = useMemo(() => {
-        if (!account) return <></>;
+        if (!account) return null;
         return (
             <Transition
                 show={true}
