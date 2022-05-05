@@ -7,7 +7,7 @@ import PrinterTop from './Printer/PrinterTop';
 import UnderlineLink from './UnderlineLink';
 
 function PrinterMintContainer() {
-    const { ticketStatus, error, account } = useMintingContext();
+    const { ticketStatus, error, printerStatus } = useMintingContext();
     const [idx, setIdx] = useState(0);
 
     const incrementIdx = useCallback(() => {
@@ -21,18 +21,9 @@ function PrinterMintContainer() {
         return () => clearInterval(interval);
     }, [incrementIdx]);
 
-    const printerStatus = useMemo(() => {
-        let status = 'waiting';
-        if (account) {
-            status = 'connected';
-        }
-
-        if (error) {
-            status = 'failed';
-        }
-
-        return status.concat(Array((idx % 4) + 1).join('.'));
-    }, [idx, account, error]);
+    const usePrinterStatus = useMemo(() => {
+        return printerStatus.concat(Array((idx % 4) + 1).join('.'));
+    }, [idx, printerStatus]);
 
     return (
         <div className="flex min-w-full flex-1 flex-col items-center py-10 xl:min-w-[65%] xl:py-10">
@@ -42,7 +33,7 @@ function PrinterMintContainer() {
                 </p>
             </div>
             <div className="relative flex min-w-[90%] flex-col md:min-w-[50%]">
-                <PrinterTop status={printerStatus} className="z-10" />
+                <PrinterTop status={usePrinterStatus} className="z-10" />
                 <FoundersTicket
                     className={`absolute left-1/2 ml-[-45px] w-[100px] text-center transition-all duration-700 ${
                         ticketStatus == 0
@@ -93,6 +84,7 @@ function PrinterMintContainer() {
                                 </button>
                             );
                         }
+
                         return (
                             <button
                                 className="bg-black px-10 py-2 font-semibold uppercase text-white hover:text-gray-300"
@@ -114,4 +106,4 @@ function PrinterMintContainer() {
     );
 }
 
-export default React.memo(PrinterMintContainer);
+export default PrinterMintContainer;

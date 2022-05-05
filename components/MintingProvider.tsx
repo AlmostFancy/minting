@@ -24,6 +24,7 @@ type MintingCtx = {
     ens: string | null | undefined;
     ticketStatus: TicketStatus;
     setTicketStatus: (status: TicketStatus) => void;
+    printerStatus: string;
 
     error: string;
     setError: (error: string) => void;
@@ -43,10 +44,16 @@ function MintingProvider({ children }: MintingProviderProps) {
     const [ticketStatus, setTicketStatus] = useState<TicketStatus>(
         TicketStatus.DISCONNECTED,
     );
+    const [printerStatus, setPrinterStatus] = useState('waiting');
 
     useEffect(() => {
         if (!account) {
             setTicketStatus(TicketStatus.DISCONNECTED);
+            setPrinterStatus('waiting');
+        }
+
+        if (account?.address) {
+            setPrinterStatus('connected');
         }
     }, [account]);
 
@@ -59,6 +66,7 @@ function MintingProvider({ children }: MintingProviderProps) {
             setError,
             account: account?.address,
             ens: ensName,
+            printerStatus,
         }),
         [
             disconnect,
@@ -68,6 +76,7 @@ function MintingProvider({ children }: MintingProviderProps) {
             setError,
             account,
             ensName,
+            printerStatus,
         ],
     );
 
