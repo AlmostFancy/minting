@@ -49,18 +49,16 @@ function MintPageContainer() {
                     </div>
                     <div>
                         <button
-                            className="bg-white px-10 py-3 font-sans font-semibold uppercase text-black"
-                            onClick={() =>
-                                setTicketStatus(TicketStatus.MINTING)
-                            }
+                            className="cursor-not-allowed bg-white px-10 py-3 font-sans font-semibold uppercase text-black"
+                            disabled
                         >
-                            mint
+                            minting may 18th
                         </button>
                     </div>
                 </div>
             </Transition>
         );
-    }, [ens, account, setTicketStatus]);
+    }, [ens, account]);
 
     return (
         <>

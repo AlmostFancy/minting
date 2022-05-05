@@ -72,7 +72,7 @@ function PrinterMintContainer({ setConnectWallet }: PrinterMintContainerProps) {
                         account ? disconnect() : setConnectWallet(true)
                     }
                 >
-                    {account ? 'disconnect' : 'minting may 10'}
+                    {account ? 'disconnect' : 'minting may 18'}
                 </button>
                 <p className="pt-5">
                     Enter the almost list raffle{' '}

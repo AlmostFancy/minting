@@ -19,8 +19,8 @@ function SideNavigation() {
             <SplitLines main="supply" last="1,111" />
             <SplitLines main="per wallet" last="01" />
             <SplitLines main="price" last="0.033Ξ" />
-            <SplitLines main="mintlist date" last="May 10th" />
-            <SplitLines main="public mint" last="May 11th" />
+            <SplitLines main="mintlist date" last="May 18th" />
+            <SplitLines main="public mint" last="May 19th" />
 
             <p className="pt-5">
                 Founders pass offers early access and special perks to those who
