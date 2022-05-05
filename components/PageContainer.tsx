@@ -44,7 +44,7 @@ function PageContainer({
     return (
         <div className="flex h-screen flex-col">
             <div
-                className={`borde-black flex min-h-[80px] w-full items-center justify-between border-b bg-white px-[20px] py-[15px] text-center md:px-[40px] md:py-[21px]`}
+                className={`borde-black flex min-h-[80px] w-full items-center justify-between border-black bg-white px-[20px] py-[15px] text-center md:px-[40px] md:py-[21px]`}
             >
                 <Link href="/">
                     <a className="text-lg font-semibold uppercase text-black transition-all duration-100 hover:text-brand-red md:text-3xl">
