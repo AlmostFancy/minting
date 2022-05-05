@@ -38,13 +38,25 @@ const wagmiClient = createClient({
     provider,
 });
 
+const theme = merge(
+    lightTheme({
+        borderRadius: 'none',
+        accentColor: 'black',
+    }),
+    {
+        colors: {
+            modalBorder: 'black',
+        },
+    } as Theme,
+);
+
 function MyApp({ Component, pageProps }: AppProps) {
     return (
         <WagmiProvider client={wagmiClient}>
             <RainbowKitProvider
                 chains={chains}
                 showRecentTransactions
-                theme={lightTheme()}
+                theme={theme}
             >
                 <Component {...pageProps} />
             </RainbowKitProvider>
