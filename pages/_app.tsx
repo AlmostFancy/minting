@@ -52,6 +52,9 @@ const rainbowTheme = merge(
         colors: {
             modalBorder: 'black',
         },
+        fonts: {
+            body: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
+        },
     } as Theme,
 );
 
