@@ -5,6 +5,7 @@ import {
     apiProvider,
     configureChains,
     connectorsForWallets,
+    getDefaultWallets,
     lightTheme,
     RainbowKitProvider,
     Theme,
@@ -18,22 +19,16 @@ const { chains, provider } = configureChains(
     [apiProvider.alchemy(process.env.ALCHEMY_ID), apiProvider.fallback()],
 );
 
+const { wallets } = getDefaultWallets({
+    appName: 'AlmostFancy',
+    chains,
+});
+
 const connectors = connectorsForWallets([
+    ...wallets,
     {
-        groupName: 'Fancy Ones',
-        wallets: [
-            wallet.metaMask({ chains }),
-            wallet.walletConnect({ chains }),
-            wallet.rainbow({ chains }),
-        ],
-    },
-    {
-        groupName: 'Almost Fancy Ones',
-        wallets: [
-            wallet.ledger({ chains }),
-            wallet.coinbase({ appName: 'Almost Fancy', chains }),
-            wallet.argent({ chains }),
-        ],
+        groupName: 'More',
+        wallets: [wallet.ledger({ chains }), wallet.argent({ chains })],
     },
 ]);
 
@@ -43,28 +38,13 @@ const wagmiClient = createClient({
     provider,
 });
 
-const rainbowTheme = merge(
-    lightTheme({
-        borderRadius: 'none',
-        accentColor: 'black',
-    }),
-    {
-        colors: {
-            modalBorder: 'black',
-        },
-        fonts: {
-            body: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
-        },
-    } as Theme,
-);
-
 function MyApp({ Component, pageProps }: AppProps) {
     return (
         <WagmiProvider client={wagmiClient}>
             <RainbowKitProvider
                 chains={chains}
                 showRecentTransactions
-                theme={rainbowTheme}
+                theme={lightTheme()}
             >
                 <Component {...pageProps} />
             </RainbowKitProvider>
