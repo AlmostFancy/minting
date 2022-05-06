@@ -47,6 +47,9 @@ const theme = merge(
         colors: {
             modalBorder: 'black',
         },
+        fonts: {
+            body: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+        },
     } as Theme,
 );
 

@@ -1,17 +1,28 @@
 import { Transition } from '@headlessui/react';
 import Head from 'next/head';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useAccount, useEnsName } from 'wagmi';
 import { shortenAddress } from '../hooks/useShortAddress';
-import { useMintingContext } from './MintingProvider';
 import PageContainer from './PageContainer';
 import PrinterMintContainer from './PrinterMintContainer';
 import SideNavigation from './SideNavigation';
 
 function MintPageContainer() {
-    const { account, ens } = useMintingContext();
+    const { data: account } = useAccount();
+    const { data: ens } = useEnsName({ address: account?.address });
+
+    const [shouldRenderFooter, setShouldRenderFooter] = useState(false);
+
+    useEffect(() => {
+        console.log(account);
+        if (!!account) {
+            setShouldRenderFooter(true);
+        } else {
+            setShouldRenderFooter(false);
+        }
+    }, [account]);
 
     const overrideFooter = useMemo(() => {
-        if (!account) return null;
         return (
             <Transition
                 show={true}
@@ -33,11 +44,8 @@ function MintPageContainer() {
                         <p className="block font-light md:hidden md:pr-0 xl:block">
                             /
                         </p>
-                        <p className="hidden font-light xl:block">
-                            {ens ? ens : shortenAddress(account)}
-                        </p>
-                        <p className="block font-light xl:hidden">
-                            {ens ? ens : shortenAddress(account)}
+                        <p className="font-light">
+                            {ens ? ens : shortenAddress(account?.address)}
                         </p>
                     </div>
                     <div>
@@ -51,14 +59,16 @@ function MintPageContainer() {
                 </div>
             </Transition>
         );
-    }, [ens, account]);
+    }, [account, ens]);
 
     return (
         <>
             <Head>
                 <title>AlmostFancy - Founders Pass Mint</title>
             </Head>
-            <PageContainer overrideFooter={overrideFooter}>
+            <PageContainer
+                overrideFooter={shouldRenderFooter ? overrideFooter : null}
+            >
                 <div className="pg-10 flex flex-1 flex-col-reverse xl:flex-row">
                     <SideNavigation />
                     <PrinterMintContainer />
