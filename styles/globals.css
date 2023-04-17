@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    html {
+        font-family: 'Work Sans', sans-serif;
+    }
+}
+
+@layer utilities {
+    .text-outline {
+        text-shadow: -1px -1px 0 #000, 0 -1px 0 #000, 1px -1px 0 #000,
+            1px 0 0 #000, 1px 1px 0 #000, 0 1px 0 #000, -1px 1px 0 #000,
+            -1px 0 0 #000;
+    }
+
+    .text-outline-white {
+        text-shadow: -1px -1px 0 #fff, 0 -1px 0 #fff, 1px -1px 0 #fff,
+            1px 0 0 #fff, 1px 1px 0 #fff, 0 1px 0 #fff, -1px 1px 0 #fff,
+            -1px 0 0 #fff;
+    }
+}
